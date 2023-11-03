@@ -21,7 +21,6 @@ public class KVServer {
         this.mu.lock();
         String key = id.getKey();
         long ver = id.getVer();
-        //
         Map<Long, Version> s = this.storage.get(key);
         if (Objects.isNull(s)) {
             s = new HashMap<>();
@@ -37,7 +36,41 @@ public class KVServer {
         return v;
     }
 
-    public Paxoskv.Acceptor Accept(Paxoskv.Proposer proposer){
-        return null;
+    public Paxoskv.Acceptor Prepare(Paxoskv.Proposer p) {
+        Version v = this.getLockedVersion(p.getId());
+        Paxoskv.Acceptor reply = v.getAcceptor();
+        if (this.ge(p.getBal(), v.getAcceptor().getLastBal())) {
+            v.getAcceptor().newBuilderForType().setLastBal(p.getBal());
+        }
+        v.getMu().unlock();
+        return reply;
+    }
+
+
+    public Paxoskv.Acceptor Accept(Paxoskv.Proposer p) {
+        Version v = this.getLockedVersion(p.getId());
+        Paxoskv.BallotNum d = v.getAcceptor().getLastBal();
+        //初始化返回值
+        Paxoskv.Acceptor reply = Paxoskv.Acceptor.newBuilder()
+                .setLastBal(d)
+                .build();
+        if (this.ge(p.getBal(),v.getAcceptor().getLastBal())){
+            v.getAcceptor().newBuilderForType()
+                    .setLastBal(p.getBal())
+                    .setVal(p.getVal())
+                    .setVBal(p.getBal());
+        }
+        return reply;
+    }
+
+    public boolean ge(Paxoskv.BallotNum a, Paxoskv.BallotNum b) {
+        //
+        if (a.getN() > b.getN()) {
+            return true;
+        }
+        if (a.getN() < b.getN()) {
+            return false;
+        }
+        return a.getProposerId() >= b.getProposerId();
     }
 }
