@@ -1,11 +1,13 @@
 package com;
 
+import io.grpc.stub.StreamObserver;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 
-public class KVServer {
+public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
     private Lock mu;
     /**
      * 存储多个值的多个版本
@@ -36,35 +38,38 @@ public class KVServer {
         return v;
     }
 
-    public Paxoskv.Acceptor Prepare(Paxoskv.Proposer p) {
-        Version v = this.getLockedVersion(p.getId());
-        Paxoskv.Acceptor reply = v.getAcceptor();
-        if (this.ge(p.getBal(), v.getAcceptor().getLastBal())) {
-            v.getAcceptor().newBuilderForType().setLastBal(p.getBal());
-        }
-        v.getMu().unlock();
-        return reply;
-    }
 
-
-    public Paxoskv.Acceptor Accept(Paxoskv.Proposer p) {
-        Version v = this.getLockedVersion(p.getId());
+    @Override
+    public void accept(Paxoskv.Proposer request, StreamObserver<Paxoskv.Acceptor> responseObserver) {
+        Version v = this.getLockedVersion(request.getId());
         Paxoskv.BallotNum d = v.getAcceptor().getLastBal();
-        //初始化返回值
         Paxoskv.Acceptor reply = Paxoskv.Acceptor.newBuilder()
                 .setLastBal(d)
                 .build();
-        if (this.ge(p.getBal(),v.getAcceptor().getLastBal())){
+        //初始化返回值
+        if (this.ge(request.getBal(), v.getAcceptor().getLastBal())) {
             v.getAcceptor().newBuilderForType()
-                    .setLastBal(p.getBal())
-                    .setVal(p.getVal())
-                    .setVBal(p.getBal());
+                    .setLastBal(request.getBal())
+                    .setVal(request.getVal())
+                    .setVBal(request.getBal());
         }
-        return reply;
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void prepare(Paxoskv.Proposer request, StreamObserver<Paxoskv.Acceptor> responseObserver) {
+        Version v = this.getLockedVersion(request.getId());
+        Paxoskv.Acceptor reply = v.getAcceptor();
+        if (this.ge(request.getBal(), v.getAcceptor().getLastBal())) {
+            v.getAcceptor().newBuilderForType().setLastBal(request.getBal());
+        }
+        v.getMu().unlock();
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
     }
 
     public boolean ge(Paxoskv.BallotNum a, Paxoskv.BallotNum b) {
-        //
         if (a.getN() > b.getN()) {
             return true;
         }
