@@ -35,6 +35,7 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
             v.setAcceptor(acceptor);
         }
         v.getMu().lock();
+        this.mu.unlock();
         return v;
     }
 
@@ -55,6 +56,7 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
         }
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
+        v.getMu().unlock();
     }
 
     @Override
