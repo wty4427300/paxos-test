@@ -2,6 +2,7 @@ package com;
 
 
 import java.util.concurrent.locks.Lock;
+import proto.Paxoskv;
 
 public class Version {
     private Lock mu;

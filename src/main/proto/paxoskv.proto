@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option  java_package = "com";
+option  java_package = "proto";
 
 // PaxosKV defines the paxos RPC.
 //

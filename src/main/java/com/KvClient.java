@@ -6,6 +6,8 @@ import io.grpc.ManagedChannelBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import proto.Paxoskv;
+import proto.PaxosKVGrpc;
 
 public class KvClient {
 

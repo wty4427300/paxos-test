@@ -6,13 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
+import proto.PaxosKVGrpc;
+import proto.Paxoskv;
 
 public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
-    private Lock mu;
+    private final Lock mu;
     /**
      * 存储多个值的多个版本
      */
-    private Map<String, Map<Long, Version>> storage;
+    private final Map<String, Map<Long, Version>> storage;
 
     public KVServer() {
         this.mu = new Mutex();
