@@ -50,7 +50,7 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
                 .setLastBal(d)
                 .build();
         //初始化返回值
-        if (this.ge(request.getBal(), v.getAcceptor().getLastBal())) {
+        if (ge(request.getBal(), v.getAcceptor().getLastBal())) {
             v.getAcceptor().newBuilderForType()
                     .setLastBal(request.getBal())
                     .setVal(request.getVal())
@@ -65,7 +65,7 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
     public void prepare(Paxoskv.Proposer request, StreamObserver<Paxoskv.Acceptor> responseObserver) {
         Version v = this.getLockedVersion(request.getId());
         Paxoskv.Acceptor reply = v.getAcceptor();
-        if (this.ge(request.getBal(), v.getAcceptor().getLastBal())) {
+        if (ge(request.getBal(), v.getAcceptor().getLastBal())) {
             v.getAcceptor().newBuilderForType().setLastBal(request.getBal());
         }
         v.getMu().unlock();
@@ -73,7 +73,7 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
         responseObserver.onCompleted();
     }
 
-    public boolean ge(Paxoskv.BallotNum a, Paxoskv.BallotNum b) {
+    public static boolean ge(Paxoskv.BallotNum a, Paxoskv.BallotNum b) {
         if (a.getN() > b.getN()) {
             return true;
         }
