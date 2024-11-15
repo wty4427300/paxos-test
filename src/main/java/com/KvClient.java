@@ -43,10 +43,12 @@ public class KvClient {
 
             ok += 1;
 
+            //达到多数派，Phase1 完成
             if (ok == quorum) {
                 return new Phase1Response(maxVoted.getVal());
             }
         }
+        //多Proposer并发运行造成冲突，最大ballot number
         return new Phase1Response(higherBal);
     }
 

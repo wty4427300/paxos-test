@@ -4,8 +4,9 @@ import proto.Paxoskv;
 
 public class Phase1Response {
 
-    Paxoskv.Value value;
-    Paxoskv.BallotNum ballotNum;
+    private Paxoskv.Value value;
+    private Paxoskv.BallotNum ballotNum;
+
 
     public Phase1Response() {
     }
@@ -15,11 +16,6 @@ public class Phase1Response {
     }
 
     public Phase1Response(Paxoskv.BallotNum ballotNum) {
-        this.ballotNum = ballotNum;
-    }
-
-    public Phase1Response(Paxoskv.Value value, Paxoskv.BallotNum ballotNum) {
-        this.value = value;
         this.ballotNum = ballotNum;
     }
 
