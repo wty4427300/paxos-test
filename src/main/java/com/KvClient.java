@@ -52,6 +52,11 @@ public class KvClient {
         return new Phase1Response(higherBal);
     }
 
+    public Paxoskv.BallotNum Phase2(long[] acceptorIds, int quorum) {
+        List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, "Accept");
+        return null;
+    }
+
     /**
      * @param acceptorIds id数组
      * @param action      prepare/Accept
