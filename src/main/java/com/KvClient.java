@@ -59,7 +59,7 @@ public class KvClient {
 
     /**
      * @param acceptorIds id数组
-     * @param action      prepare/Accept
+     * @param action      Prepare/Accept
      */
     public List<Paxoskv.Acceptor> rpcToAll(long[] acceptorIds, String action) {
         List<Paxoskv.Acceptor> replies = new ArrayList<>();
@@ -71,7 +71,7 @@ public class KvClient {
 
             try {
                 Paxoskv.Acceptor reply = Paxoskv.Acceptor.newBuilder().build();
-                if (action.equals("prepare")) {
+                if (action.equals("Prepare")) {
                     reply = blockingStub.prepare(this.p);
                 } else if (action.equals("Accept")) {
                     reply = blockingStub.accept(this.p);
