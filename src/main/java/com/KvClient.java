@@ -12,7 +12,9 @@ import java.util.concurrent.TimeUnit;
 import proto.Paxoskv;
 import proto.PaxosKVGrpc;
 
-public class KvClient{
+import static com.KVServer.ge;
+
+public class KvClient {
 
     public static final long AcceptorBasePort = 3333;
 
@@ -22,13 +24,30 @@ public class KvClient{
         this.p = p;
     }
 
-    public void Phase1(long[] acceptorIds, int  quorum) {
+    public Phase1Response Phase1(long[] acceptorIds, int quorum) {
         List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, "Prepare");
-        for (Paxoskv.Acceptor reply : replies) {
-            if (reply.get.getV() > p.getBal().getV()) {
-                p = Paxoskv.Proposer.newBuilder(p).setBal(reply.getVBal()).build();
+        int ok = 0;
+        Paxoskv.BallotNum higherBal = p.getBal();
+        Paxoskv.Acceptor maxVoted = Paxoskv.Acceptor.newBuilder()
+                .setVBal(Paxoskv.BallotNum.newBuilder().build()).build();
+
+        for (Paxoskv.Acceptor r : replies) {
+            if (!ge(p.getBal(), r.getLastBal())) {
+                higherBal = r.getLastBal();
+                continue;
+            }
+
+            if (ge(r.getVBal(), maxVoted.getVBal())) {
+                maxVoted = r;
+            }
+
+            ok += 1;
+
+            if (ok == quorum) {
+                return new Phase1Response(maxVoted.getVal());
             }
         }
+        return new Phase1Response(higherBal);
     }
 
     /**
