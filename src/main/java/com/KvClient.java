@@ -18,7 +18,7 @@ public class KvClient {
 
     public static final long AcceptorBasePort = 3333;
 
-    private Paxoskv.Proposer p;
+    private final Paxoskv.Proposer p;
 
     public KvClient(Paxoskv.Proposer p) {
         this.p = p;
@@ -54,7 +54,19 @@ public class KvClient {
 
     public Paxoskv.BallotNum Phase2(long[] acceptorIds, int quorum) {
         List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, "Accept");
-        return null;
+        int ok = 0;
+        Paxoskv.BallotNum higherBal = p.getBal();
+        for (Paxoskv.Acceptor r : replies) {
+            if (!ge(p.getBal(), r.getLastBal())) {
+                higherBal = r.getLastBal();
+                continue;
+            }
+            ok += 1;
+            if (ok == quorum) {
+                return null;
+            }
+        }
+        return higherBal;
     }
 
     /**
