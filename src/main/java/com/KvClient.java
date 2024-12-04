@@ -24,7 +24,7 @@ public class KvClient {
         this.p = p;
     }
 
-    public Phase1Response Phase1(long[] acceptorIds, int quorum) {
+    public Phase1Response phase1(long[] acceptorIds, int quorum) {
         List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, "Prepare");
         int ok = 0;
         Paxoskv.BallotNum higherBal = p.getBal();
@@ -52,7 +52,7 @@ public class KvClient {
         return new Phase1Response(higherBal);
     }
 
-    public Paxoskv.BallotNum Phase2(long[] acceptorIds, int quorum) {
+    public Paxoskv.BallotNum phase2(long[] acceptorIds, int quorum) {
         List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, "Accept");
         int ok = 0;
         Paxoskv.BallotNum higherBal = p.getBal();
@@ -100,5 +100,24 @@ public class KvClient {
             }
         }
         return replies;
+    }
+
+    public Paxoskv.Value RunPaxos(long[] acceptorIds, Paxoskv.Value value) {
+        int quorum = acceptorIds.length / 2 + 1;
+        for (; ; ) {
+            Paxoskv.Value val;
+            val=value;
+            Phase1Response p1 = phase1(acceptorIds, quorum);
+            if (p1.getValue()==null){
+                p.toBuilder().setVal(val).build();
+            }else {
+                //有值说明有其他节点在运行
+                val=p1.getValue();
+            }
+            if(val == null) {
+                return null;
+            }
+            Paxoskv.BallotNum higherBal = phase2(acceptorIds, quorum);
+        }
     }
 }
