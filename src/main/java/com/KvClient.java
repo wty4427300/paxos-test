@@ -16,7 +16,7 @@ import static com.KVServer.ge;
 
 public class KvClient {
 
-    public static final long AcceptorBasePort = 3333;
+    public static final int AcceptorBasePort = 3333;
 
     private final Paxoskv.Proposer p;
 

@@ -11,6 +11,8 @@ import java.util.concurrent.locks.Lock;
 import proto.PaxosKVGrpc;
 import proto.Paxoskv;
 
+import static com.KvClient.AcceptorBasePort;
+
 public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
     private final Lock mu;
     /**
@@ -91,7 +93,7 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
         List<Server> servers = new ArrayList<>();
 
         for (Long aid : acceptorIds) {
-            int port = ACCEPTOR_BASE_PORT + aid.intValue();
+            int port = AcceptorBasePort + aid.intValue();
             Server server = ServerBuilder
                     .forPort(port)
                     .addService(new KVServer())
