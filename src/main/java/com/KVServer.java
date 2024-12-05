@@ -7,7 +7,6 @@ import io.grpc.stub.StreamObserver;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import proto.PaxosKVGrpc;
 import proto.Paxoskv;
