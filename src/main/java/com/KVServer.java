@@ -1,10 +1,13 @@
 package com;
 
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.protobuf.services.ProtoReflectionService;
 import io.grpc.stub.StreamObserver;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import proto.PaxosKVGrpc;
 import proto.Paxoskv;
@@ -81,5 +84,35 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
             return false;
         }
         return a.getProposerId() >= b.getProposerId();
+    }
+
+    private static final int ACCEPTOR_BASE_PORT = 5000;
+
+    public static List<Server> serveAcceptors(List<Long> acceptorIds) throws IOException {
+        List<Server> servers = new ArrayList<>();
+
+        for (Long aid : acceptorIds) {
+            int port = ACCEPTOR_BASE_PORT + aid.intValue();
+            Server server = ServerBuilder
+                    .forPort(port)
+                    .addService(new KVServer())
+                    // Enables reflection for gRPC
+                    .addService(ProtoReflectionService.newInstance())
+                    .build();
+
+            servers.add(server);
+
+            // Start the server in a separate thread
+            new Thread(() -> {
+                try {
+                    System.out.printf("Acceptor-%d serving on port %d...\n", aid, port);
+                    server.start();
+                    server.awaitTermination();
+                } catch (IOException | InterruptedException e) {
+                    System.err.printf("Server for acceptor-%d failed to start: %s\n", aid, e.getMessage());
+                }
+            }).start();
+        }
+        return servers;
     }
 }
