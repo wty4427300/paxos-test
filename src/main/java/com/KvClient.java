@@ -104,20 +104,24 @@ public class KvClient {
 
     public Paxoskv.Value RunPaxos(long[] acceptorIds, Paxoskv.Value value) {
         int quorum = acceptorIds.length / 2 + 1;
-        for (; ; ) {
-            Paxoskv.Value val;
-            val=value;
+        while (true) {
+            p.toBuilder().setVal(value);
             Phase1Response p1 = phase1(acceptorIds, quorum);
-            if (p1.getValue()==null){
-                p.toBuilder().setVal(val).build();
-            }else {
-                //有值说明有其他节点在运行
-                val=p1.getValue();
-            }
-            if(val == null) {
-                return null;
+            Paxoskv.Value maxVotedVal = p1.getValue();
+            Paxoskv.BallotNum p1BallotNum = p1.getBallotNum();
+
+            if (maxVotedVal != null) {
+                p.toBuilder().setVal(maxVotedVal);
+            } else {
+                p.getBal().toBuilder().setN(p1BallotNum.getN() + 1).build();
+                continue;
             }
             Paxoskv.BallotNum higherBal = phase2(acceptorIds, quorum);
+            if (higherBal != null) {
+                p.getBal().toBuilder().setN(higherBal.getN() + 1).build();
+                continue;
+            }
+            return p.getVal();
         }
     }
 }
