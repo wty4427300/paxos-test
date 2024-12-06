@@ -5,6 +5,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import io.grpc.stub.StreamObserver;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -14,7 +15,7 @@ import proto.Paxoskv;
 
 import static com.KvClient.AcceptorBasePort;
 
-public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
+public class KVServer extends PaxosKVGrpc.PaxosKVImplBase{
     private final Lock mu;
     /**
      * 存储多个值的多个版本

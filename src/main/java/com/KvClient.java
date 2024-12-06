@@ -24,7 +24,7 @@ public class KvClient {
         this.p = p;
     }
 
-    public Phase1Response phase1(long[] acceptorIds, int quorum) {
+    public Phase1Response phase1(List<Long> acceptorIds, int quorum) {
         List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, "Prepare");
         int ok = 0;
         Paxoskv.BallotNum higherBal = p.getBal();
@@ -52,7 +52,7 @@ public class KvClient {
         return new Phase1Response(higherBal);
     }
 
-    public Paxoskv.BallotNum phase2(long[] acceptorIds, int quorum) {
+    public Paxoskv.BallotNum phase2(List<Long> acceptorIds, int quorum) {
         List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, "Accept");
         int ok = 0;
         Paxoskv.BallotNum higherBal = p.getBal();
@@ -73,9 +73,9 @@ public class KvClient {
      * @param acceptorIds id数组
      * @param action      Prepare/Accept
      */
-    public List<Paxoskv.Acceptor> rpcToAll(long[] acceptorIds, String action) {
+    public List<Paxoskv.Acceptor> rpcToAll(List<Long> acceptorIds, String action) {
         List<Paxoskv.Acceptor> replies = new ArrayList<>();
-        for (long aid : acceptorIds) {
+        for (Long aid : acceptorIds) {
             String address = String.format("127.0.0.1:%d", AcceptorBasePort + aid);
             ManagedChannelBuilder<?> channelBuilder = Grpc.newChannelBuilder(address, InsecureChannelCredentials.create());
             ManagedChannel channel = channelBuilder.build();
@@ -102,8 +102,8 @@ public class KvClient {
         return replies;
     }
 
-    public Paxoskv.Value RunPaxos(long[] acceptorIds, Paxoskv.Value value) {
-        int quorum = acceptorIds.length / 2 + 1;
+    public Paxoskv.Value runPaxos(List<Long> acceptorIds, Paxoskv.Value value) {
+        int quorum = acceptorIds.size() / 2 + 1;
         while (true) {
             p.toBuilder().setVal(value);
             Phase1Response p1 = phase1(acceptorIds, quorum);
