@@ -24,6 +24,7 @@ public class TestSetAndGetByKeyVer {
         System.out.println("v:" + v.getVi64());
         //读
         v = client.runPaxos(acceptorIds, value);
+        System.out.println("v:" + v.getVi64());
         for (Server server : servers) {
             server.shutdown();
         }
