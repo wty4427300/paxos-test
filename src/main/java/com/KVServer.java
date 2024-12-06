@@ -8,6 +8,7 @@ import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
+
 import proto.PaxosKVGrpc;
 import proto.Paxoskv;
 
@@ -89,7 +90,7 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase {
 
     private static final int ACCEPTOR_BASE_PORT = 5000;
 
-    public static List<Server> serveAcceptors(List<Long> acceptorIds) throws IOException {
+    public static List<Server> serveAcceptors(List<Long> acceptorIds) {
         List<Server> servers = new ArrayList<>();
 
         for (Long aid : acceptorIds) {
