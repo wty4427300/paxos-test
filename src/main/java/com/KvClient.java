@@ -116,6 +116,11 @@ public class KvClient {
                 p.getBal().toBuilder().setN(p1BallotNum.getN() + 1).build();
                 continue;
             }
+
+            if (value == null) {
+                return null;
+            }
+
             Paxoskv.BallotNum higherBal = phase2(acceptorIds, quorum);
             if (higherBal != null) {
                 p.getBal().toBuilder().setN(higherBal.getN() + 1).build();

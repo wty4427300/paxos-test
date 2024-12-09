@@ -6,6 +6,8 @@ import proto.Paxoskv;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.BuildUtils.buildProposer;
+import static com.BuildUtils.buildValue;
 import static com.KVServer.serveAcceptors;
 
 public class TestSetAndGetByKeyVer {
@@ -13,20 +15,29 @@ public class TestSetAndGetByKeyVer {
     void test() {
         List<Long> acceptorIds = Arrays.asList(0L, 1L, 2L);
         List<Server> servers = serveAcceptors(acceptorIds);
-        //初始化proposer
-        Paxoskv.PaxosInstanceId id = Paxoskv.PaxosInstanceId.newBuilder().setKey("foo").setVer(0).build();
-        Paxoskv.BallotNum.Builder bal = Paxoskv.BallotNum.newBuilder().setN(0).setProposerId(2);
-        Paxoskv.Proposer proposer = Paxoskv.Proposer.newBuilder().setId(id).setBal(bal).build();
-        //写
+
+        Paxoskv.Proposer proposer = buildProposer("foo", 0L, 0L, 2L);
         KvClient client = new KvClient(proposer);
-        Paxoskv.Value value = Paxoskv.Value.newBuilder().setVi64(5).build();
-        Paxoskv.Value v = client.runPaxos(acceptorIds, value);
-        System.out.println("v:" + v.getVi64());
-        //读
-        v = client.runPaxos(acceptorIds, value);
-        System.out.println("v:" + v.getVi64());
+        Paxoskv.Value v = client.runPaxos(acceptorIds, buildValue(5L));
+        System.out.println("written v:" + v.getVi64());
+
+        Paxoskv.Proposer proposer1 = buildProposer("foo", 0L, 0L, 2L);
+        KvClient client1 = new KvClient(proposer1);
+        Paxoskv.Value v1 = client1.runPaxos(acceptorIds, null);
+        System.out.println("read v:" + v1.getVi64());
+
+        Paxoskv.Proposer proposer2 = buildProposer("foo", 1L, 0L, 2L);
+        KvClient client2 = new KvClient(proposer2);
+        Paxoskv.Value v2 = client2.runPaxos(acceptorIds, buildValue(6L));
+        System.out.println("written v:" + v2.getVi64());
+
+        Paxoskv.Proposer proposer3 = buildProposer("foo", 1L, 0L, 2L);
+        KvClient client3 = new KvClient(proposer3);
+        Paxoskv.Value v3 = client3.runPaxos(acceptorIds, null);
+        System.out.println("read v:" + v3.getVi64());
         for (Server server : servers) {
             server.shutdown();
         }
     }
+
 }
