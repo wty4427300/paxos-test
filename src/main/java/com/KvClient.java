@@ -105,6 +105,11 @@ public class KvClient {
     public Paxoskv.Value runPaxos(List<Long> acceptorIds, Paxoskv.Value value) {
         int quorum = acceptorIds.size() / 2 + 1;
         while (true) {
+
+            if (value == null) {
+                return null;
+            }
+
             p.toBuilder().setVal(value);
             Phase1Response p1 = phase1(acceptorIds, quorum);
             Paxoskv.Value maxVotedVal = p1.getValue();
@@ -117,9 +122,6 @@ public class KvClient {
                 continue;
             }
 
-            if (value == null) {
-                return null;
-            }
 
             Paxoskv.BallotNum higherBal = phase2(acceptorIds, quorum);
             if (higherBal != null) {
