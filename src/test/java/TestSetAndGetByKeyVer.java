@@ -19,22 +19,22 @@ public class TestSetAndGetByKeyVer {
         Paxoskv.Proposer proposer = buildProposer("foo", 0L, 0L, 2L);
         KvClient client = new KvClient(proposer);
         Paxoskv.Value v = client.runPaxos(acceptorIds, buildValue(5L));
-        System.out.println("written v:" + v.getVi64());
+        System.out.println("written v:" + v);
 
         Paxoskv.Proposer proposer1 = buildProposer("foo", 0L, 0L, 2L);
         KvClient client1 = new KvClient(proposer1);
         Paxoskv.Value v1 = client1.runPaxos(acceptorIds, null);
-        System.out.println("read v:" + v1.getVi64());
+        System.out.println("read v:" + v1);
 
         Paxoskv.Proposer proposer2 = buildProposer("foo", 1L, 0L, 2L);
         KvClient client2 = new KvClient(proposer2);
         Paxoskv.Value v2 = client2.runPaxos(acceptorIds, buildValue(6L));
-        System.out.println("written v:" + v2.getVi64());
+        System.out.println("written v:" + v2);
 
         Paxoskv.Proposer proposer3 = buildProposer("foo", 1L, 0L, 2L);
         KvClient client3 = new KvClient(proposer3);
         Paxoskv.Value v3 = client3.runPaxos(acceptorIds, null);
-        System.out.println("read v:" + v3.getVi64());
+        System.out.println("read v:" + v3);
         for (Server server : servers) {
             server.shutdown();
         }

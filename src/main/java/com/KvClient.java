@@ -18,7 +18,7 @@ public class KvClient {
 
     public static final int AcceptorBasePort = 3333;
 
-    private final Paxoskv.Proposer p;
+    private Paxoskv.Proposer p;
 
     public KvClient(Paxoskv.Proposer p) {
         this.p = p;
@@ -28,8 +28,7 @@ public class KvClient {
         List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, "Prepare");
         int ok = 0;
         Paxoskv.BallotNum higherBal = p.getBal();
-        Paxoskv.Acceptor maxVoted = Paxoskv.Acceptor.newBuilder()
-                .setVBal(Paxoskv.BallotNum.newBuilder().build()).build();
+        Paxoskv.Acceptor maxVoted = Paxoskv.Acceptor.getDefaultInstance();
 
         for (Paxoskv.Acceptor r : replies) {
             if (!ge(p.getBal(), r.getLastBal())) {
@@ -110,22 +109,23 @@ public class KvClient {
                 return null;
             }
 
-            p.toBuilder().setVal(value);
+            this.p = p.toBuilder().setBal(Paxoskv.BallotNum.newBuilder()).setVal(value).build();
             Phase1Response p1 = phase1(acceptorIds, quorum);
             Paxoskv.Value maxVotedVal = p1.getValue();
             Paxoskv.BallotNum p1BallotNum = p1.getBallotNum();
 
-            if (maxVotedVal != null) {
-                p.toBuilder().setVal(maxVotedVal);
+            if (maxVotedVal == null || maxVotedVal.getSerializedSize() == 0) {
+                String format = String.format("Proposer: no voted value seen, propose my value: %d", value.getVi64());
+                System.out.println(format);
             } else {
-                p.getBal().toBuilder().setN(p1BallotNum.getN() + 1).build();
-                continue;
+                this.p = p.toBuilder().setVal(maxVotedVal).build();
             }
 
 
             Paxoskv.BallotNum higherBal = phase2(acceptorIds, quorum);
             if (higherBal != null) {
-                p.getBal().toBuilder().setN(higherBal.getN() + 1).build();
+                Paxoskv.BallotNum ballotNum = p.getBal().toBuilder().setN(higherBal.getN() + 1).build();
+                this.p = p.toBuilder().setBal(ballotNum).build();
                 continue;
             }
             return p.getVal();
