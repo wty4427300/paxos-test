@@ -40,4 +40,9 @@ public class TestSetAndGetByKeyVer {
         }
     }
 
+    public static void main(String[] args) {
+        Paxoskv.Value value = Paxoskv.Value.newBuilder().build();
+        System.out.println(value.getSerializedSize());
+        System.out.println(value.isInitialized());
+    }
 }

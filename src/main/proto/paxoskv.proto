@@ -28,7 +28,7 @@ message BallotNum {
 // Value is the value part of a key-value record.
 // In this demo it is just a int64
 message Value {
-    int64 Vi64 = 1;
+    int64 Vi64 = 1 [(javanano).type = "java.lang.Long"];
 }
 
 // PaxosInstanceId specifies what paxos instance it runs on.
