@@ -80,12 +80,6 @@
             <version>4.4.0</version>
             <scope>test</scope>
         </dependency>
-        <!-- 添加 javanano 依赖 -->
-        <dependency>
-            <groupId>com.google.protobuf.nano</groupId>
-            <artifactId>protobuf-javanano</artifactId>
-            <version>3.1.0</version>
-        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -113,17 +107,6 @@
                     <pluginId>grpc-java</pluginId>
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
                     </pluginArtifact>
-                    <!-- 配置使用 javanano 插件 -->
-                    <pluginExecutable>protoc-gen-javanano</pluginExecutable>
-                    <protocPlugins>
-                        <protocPlugin>
-                            <id>javanano</id>
-                            <groupId>com.google.protobuf</groupId>
-                            <artifactId>protoc-gen-javanano</artifactId>
-                            <version>${protobuf.version}</version>
-                            <mainClass>com.google.protobuf.nano.protobuf_nano_plugin.Main</mainClass>
-                        </protocPlugin>
-                    </protocPlugins>
                 </configuration>
                 <executions>
                     <execution>
@@ -137,7 +120,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.0</version> <!-- 使用较新的版本 -->
                 <executions>
                     <execution>
                         <id>enforce</id>
