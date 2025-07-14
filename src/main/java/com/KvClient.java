@@ -108,7 +108,7 @@ public class KvClient {
             // 如果 value 对象本身没有设置 Vi64 字段，说明这是一个读请求，
             // 在 Paxos 流程结束后，我们应该返回从多数派学习到的值。
             // 如果设置了 Vi64 字段，说明是写请求，我们提议写入这个值。
-            if (value == null) {
+            if (!value.hasVi64()) {
                 // 这是一个读操作，我们仍然需要走完Paxos流程来学习已经达成共识的值。
                 // 将 value 设置为一个默认的空值，而不是 null，以继续执行。
                 value = Paxoskv.Value.getDefaultInstance();
