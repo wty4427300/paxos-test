@@ -122,7 +122,7 @@ public class KvClient {
                 value = Paxoskv.Value.getDefaultInstance();
             }
 
-            this.p = p.toBuilder().setBal(Paxoskv.BallotNum.newBuilder()).setVal(value).build();
+            this.p = p.toBuilder().setVal(value).build();
             Phase1Response p1 = phase1(acceptorIds, quorum);
             Paxoskv.Value maxVotedVal = p1.getValue();
             Paxoskv.BallotNum p1BallotNum = p1.getBallotNum();

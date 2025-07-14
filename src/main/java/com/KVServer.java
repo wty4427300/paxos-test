@@ -41,6 +41,7 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase{
             v = new Version();
             Paxoskv.Acceptor acceptor = Paxoskv.Acceptor.newBuilder().build();
             v.setAcceptor(acceptor);
+            s.put(ver, v); // <-- 修复：将新创建的 Version 对象存入 Map
         }
         v.getMu().lock();
         this.mu.unlock();
