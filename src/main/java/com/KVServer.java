@@ -57,10 +57,11 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase{
                 .build();
         //初始化返回值
         if (ge(request.getBal(), v.getAcceptor().getLastBal())) {
-            v.getAcceptor().newBuilderForType()
+            v.setAcceptor(v.getAcceptor().toBuilder()
                     .setLastBal(request.getBal())
                     .setVal(request.getVal())
-                    .setVBal(request.getBal());
+                    .setVBal(request.getBal())
+                    .build());
         }
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
@@ -72,7 +73,7 @@ public class KVServer extends PaxosKVGrpc.PaxosKVImplBase{
         Version v = this.getLockedVersion(request.getId());
         Paxoskv.Acceptor reply = v.getAcceptor();
         if (ge(request.getBal(), v.getAcceptor().getLastBal())) {
-            v.getAcceptor().newBuilderForType().setLastBal(request.getBal());
+            v.setAcceptor(v.getAcceptor().toBuilder().setLastBal(request.getBal()).build());
         }
         v.getMu().unlock();
         responseObserver.onNext(reply);
