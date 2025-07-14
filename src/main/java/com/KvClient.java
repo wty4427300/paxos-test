@@ -20,12 +20,17 @@ public class KvClient {
 
     private Paxoskv.Proposer p;
 
+    public enum PaxosAction {
+        PREPARE,
+        ACCEPT
+    }
+
     public KvClient(Paxoskv.Proposer p) {
         this.p = p;
     }
 
     public Phase1Response phase1(List<Long> acceptorIds, int quorum) {
-        List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, "Prepare");
+        List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, PaxosAction.PREPARE);
         int ok = 0;
         Paxoskv.BallotNum higherBal = p.getBal();
         Paxoskv.Acceptor maxVoted = Paxoskv.Acceptor.getDefaultInstance();
@@ -52,7 +57,7 @@ public class KvClient {
     }
 
     public Paxoskv.BallotNum phase2(List<Long> acceptorIds, int quorum) {
-        List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, "Accept");
+        List<Paxoskv.Acceptor> replies = this.rpcToAll(acceptorIds, PaxosAction.ACCEPT);
         int ok = 0;
         Paxoskv.BallotNum higherBal = p.getBal();
         for (Paxoskv.Acceptor r : replies) {
@@ -70,9 +75,9 @@ public class KvClient {
 
     /**
      * @param acceptorIds id数组
-     * @param action      Prepare/Accept
+     * @param action      PREPARE/ACCEPT
      */
-    public List<Paxoskv.Acceptor> rpcToAll(List<Long> acceptorIds, String action) {
+    public List<Paxoskv.Acceptor> rpcToAll(List<Long> acceptorIds, PaxosAction action) {
         List<Paxoskv.Acceptor> replies = new ArrayList<>();
         for (Long aid : acceptorIds) {
             String address = String.format("127.0.0.1:%d", AcceptorBasePort + aid);
@@ -82,10 +87,13 @@ public class KvClient {
 
             try {
                 Paxoskv.Acceptor reply = Paxoskv.Acceptor.newBuilder().build();
-                if (action.equals("Prepare")) {
-                    reply = blockingStub.prepare(this.p);
-                } else if (action.equals("Accept")) {
-                    reply = blockingStub.accept(this.p);
+                switch (action) {
+                    case PREPARE:
+                        reply = blockingStub.prepare(this.p);
+                        break;
+                    case ACCEPT:
+                        reply = blockingStub.accept(this.p);
+                        break;
                 }
                 if (reply != null) {
                     replies.add(reply);
